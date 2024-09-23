@@ -24,10 +24,10 @@ def authenticate_principal(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         p_str = request.headers.get('X-Principal')
-        assertions.assert_auth(p_str is not None, 'principal not found')
+        assertions.assert_auth(p_str != '' and p_str is not None, 'principal not found')
         p_dict = json.loads(p_str)
         p = AuthPrincipal(
-            user_id=p_dict['user_id'],
+            user_id=p_dict.get('user_id'), 
             student_id=p_dict.get('student_id'),
             teacher_id=p_dict.get('teacher_id'),
             principal_id=p_dict.get('principal_id')
@@ -41,6 +41,5 @@ def authenticate_principal(func):
             assertions.assert_true(p.principal_id is not None, 'requester should be a principal')
         else:
             assertions.assert_found(None, 'No such api')
-
         return func(p, *args, **kwargs)
     return wrapper
